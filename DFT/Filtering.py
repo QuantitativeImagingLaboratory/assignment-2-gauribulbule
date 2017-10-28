@@ -1,3 +1,7 @@
+import cv2
+import numpy as np
+from PIL import Image
+from matplotlib import pyplot as plt
 # For this part of the assignment, You can use inbuilt functions to compute the fourier transform
 # You are welcome to use fft that are available in numpy and opencv
 
@@ -34,15 +38,28 @@ class Filtering:
         self.order = order
 
 
-    def get_ideal_low_pass_filter(self, shape, cutoff):
+    #Modified to add dummy parameter for order
+    def get_ideal_low_pass_filter(self, shape, cutoff, dummy):
         """Computes a Ideal low pass mask
         takes as input:
         shape: the shape of the mask to be generated
         cutoff: the cutoff frequency of the ideal filter
         returns a ideal low pass mask"""
 
+        cutoff = int(cutoff)
+        x = shape[0]
+        y = shape[1]
+        #center pixel
+        crow = int(x/2)
+        ccol = int(y/2)
 
-        return 0
+        y1, x1 = np.ogrid[-crow:x - crow, -ccol:y - ccol]
+        mask = x1 * x1 + y1 * y1 <= cutoff * cutoff
+
+        lowpassfilter = np.zeros((x, y),np.uint8)
+        lowpassfilter[mask] = 1
+
+        return lowpassfilter
 
 
     def get_ideal_high_pass_filter(self, shape, cutoff):
@@ -137,7 +154,52 @@ class Filtering:
         filtered image, magnitude of DFT, magnitude of filtered DFT: Make sure all images being returned have grey scale full contrast stretch and dtype=uint8 
         """
 
+        #FFT
+        ft = np.fft.fft2(self.image)
+        fshift = np.fft.fftshift(ft)
+
+        #img_float64 = np.float64(self.image)
+        #ft = cv2.dft(img_float64, flags=cv2.DFT_COMPLEX_OUTPUT)
+        #fshift = np.fft.fftshift(ft)
+        #magnitude = 20*np.log(cv2.magnitude(fshift[:, :, 0], fshift[:, :, 1]))
+
+        magnitude = 10*np.log(np.abs(fshift))
+        gray = np.array(magnitude,dtype = np.uint8)
+
+        #Get filter
+        mask = self.filter(gray.shape, self.cutoff, self.order)
+
+        #Apply mask
+        filtered_dft = gray*mask
+        #print(filtered_dft)
+
+        #inverse shift
+        i_fshift = np.fft.ifftshift(filtered_dft)
+        i_ft = np.fft.ifft2(i_fshift)
+        img_back = np.round(np.abs(i_ft))
+
+        #img_back = cv2.idft(i_fshift)
+        #img_back = cv2.magnitude(img_back[:, :, 0], img_back[:, :, 1])
+        print(img_back)
+
+        #Full scale contrast strech
+        x, y = img_back.shape
+        k = (x * y) - 1
+        A = np.min(img_back)
+        B = np.max(img_back)
+        diff = B-A
+        print("b",B)
+
+        fc_stretch = np.zeros((x,y),np.uint8)
+
+        for i in range(0, x):
+            for j in range(0, y):
+                fc_stretch[i, j] = np.round((k/diff)* (img_back[i, j] - 1) + 0.5)
+
+        print(fc_stretch)
+        cv2.imshow('image', fc_stretch)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 
-
-        return [self.image, self.image, self.image]
+        #return [gray, filtered_dft, self.image]
