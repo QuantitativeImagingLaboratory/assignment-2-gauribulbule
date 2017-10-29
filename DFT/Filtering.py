@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 from matplotlib import pyplot as plt
 # For this part of the assignment, You can use inbuilt functions to compute the fourier transform
 # You are welcome to use fft that are available in numpy and opencv
@@ -85,7 +86,6 @@ class Filtering:
         order: the order of the butterworth filter
         returns a butterworth low pass mask"""
 
-        print("order",order)
         cutoff = int(cutoff)
         x, y = shape
 
@@ -115,31 +115,65 @@ class Filtering:
         returns a butterworth high pass mask"""
         #Hint: May be one can use the low pass filter function to get a high pass mask
 
-        butterworth__high_pass_filter = 1 - self.get_butterworth_low_pass_filter(shape,cutoff,order)
-        
-        return butterworth__high_pass_filter
+        cutoff = int(cutoff)
+        x, y = shape
 
-    def get_gaussian_low_pass_filter(self, shape, cutoff):
+        # center pixel
+        crow = int(x / 2)
+        ccol = int(y / 2)
+
+        butterworth_high_pass_filter = np.zeros((x, y, 2))
+
+        for i in range(0, x):
+            for j in range(0, y):
+                dist = np.sqrt(np.square(i - crow) + np.square(j - ccol))
+                if dist == 0:
+                    butterworth_high_pass_filter[i, j, :] = 0
+
+                else:
+                    butterworth_high_pass_filter[i, j, :] = 1 / (1 + np.power((cutoff / dist), 2 * int(order)))
+
+
+        #butterworth_high_pass_filter = 1 - self.get_butterworth_low_pass_filter(shape, cutoff, order)
+        #return butterworth_high_pass_filter
+
+        return butterworth_high_pass_filter
+
+
+    def get_gaussian_low_pass_filter(self, shape, cutoff, dummy):
         """Computes a gaussian low pass mask
         takes as input:
         shape: the shape of the mask to be generated
         cutoff: the cutoff frequency of the gaussian filter (sigma)
         returns a gaussian low pass mask"""
 
-        
-        return 0
+        cutoff = int(cutoff)
+        x, y = shape
+        # center pixel
+        crow = int(x / 2)
+        ccol = int(y / 2)
 
-    def get_gaussian_high_pass_filter(self, shape, cutoff):
+        gaussian_filter = np.zeros((x, y, 2))
+
+        for i in range(0, x):
+            for j in range(0, y):
+                dist = np.square(i - crow) + np.square(j - ccol)
+                gaussian_filter[i, j, :] = math.pow(math.e,(-1*dist)/(2*cutoff*cutoff))
+
+        return gaussian_filter
+
+
+    def get_gaussian_high_pass_filter(self, shape, cutoff, dummy):
         """Computes a gaussian high pass mask
         takes as input:
         shape: the shape of the mask to be generated
         cutoff: the cutoff frequency of the gaussian filter (sigma)
         returns a gaussian high pass mask"""
-
         #Hint: May be one can use the low pass filter function to get a high pass mask
 
-        
-        return 0
+        gaussian_high_pass_filter = 1 - self.get_gaussian_low_pass_filter(shape, cutoff, dummy)
+        return gaussian_high_pass_filter
+
 
     def post_process_image(self, image):
         """Post process the image to create a full contrast stretch of the image
@@ -187,9 +221,6 @@ class Filtering:
 
         #mask
         mask = self.filter(self.image.shape, self.cutoff, self.order)
-
-        print(dft[1].shape)
-        print(mask[1].shape)
 
         # apply mask and inverse DFT
         fshift = dft_shift * mask
