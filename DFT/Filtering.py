@@ -58,6 +58,8 @@ class Filtering:
         lowpassfilter = np.zeros((x, y, 2),np.uint8)
         lowpassfilter[mask] = 1
 
+        #print(lowpassfilter[crow-5:crow+5,ccol-5:ccol+5])
+
         return lowpassfilter
 
 
@@ -67,7 +69,6 @@ class Filtering:
         shape: the shape of the mask to be generated
         cutoff: the cutoff frequency of the ideal filter
         returns a ideal high pass mask"""
-
         #Hint: May be one can use the low pass filter function to get a high pass mask
 
         lowpassfilter = self.get_ideal_low_pass_filter(shape, cutoff, dummy)
@@ -84,8 +85,26 @@ class Filtering:
         order: the order of the butterworth filter
         returns a butterworth low pass mask"""
 
-        
-        return 0
+        print("order",order)
+        cutoff = int(cutoff)
+        x, y = shape
+
+        # center pixel
+        crow = int(x / 2)
+        ccol = int(y / 2)
+
+        butterworth_filter = np.zeros((x, y, 2))
+
+        for i in range(0, x):
+            for j in range(0, y):
+
+                dist = np.sqrt(np.square(i-crow)+np.square(j-ccol))
+                butterworth_filter[i, j, :] = 1/(1 + np.power((dist/cutoff),2*int(order)))
+
+        #print(butterworth_filter[crow - 5:crow + 5, ccol - 5:ccol + 5])
+
+        return butterworth_filter
+
 
     def get_butterworth_high_pass_filter(self, shape, cutoff, order):
         """Computes a butterworth high pass mask
@@ -94,11 +113,11 @@ class Filtering:
         cutoff: the cutoff frequency of the butterworth filter
         order: the order of the butterworth filter
         returns a butterworth high pass mask"""
-
         #Hint: May be one can use the low pass filter function to get a high pass mask
 
+        butterworth__high_pass_filter = 1 - self.get_butterworth_low_pass_filter(shape,cutoff,order)
         
-        return 0
+        return butterworth__high_pass_filter
 
     def get_gaussian_low_pass_filter(self, shape, cutoff):
         """Computes a gaussian low pass mask
@@ -169,6 +188,9 @@ class Filtering:
         #mask
         mask = self.filter(self.image.shape, self.cutoff, self.order)
 
+        print(dft[1].shape)
+        print(mask[1].shape)
+
         # apply mask and inverse DFT
         fshift = dft_shift * mask
         f_ishift = np.fft.ifftshift(fshift)
@@ -176,6 +198,7 @@ class Filtering:
         img_back = cv2.magnitude(img_back[:, :, 0], img_back[:, :, 1])
 
         # Full scale contrast stretch
+        '''
         x, y = self.image.shape
         img_back2 = img_back
         fc_stretch = np.zeros((x, y))
@@ -189,11 +212,11 @@ class Filtering:
         for i in range(0, x):
             for j in range(0, y):
                 fc_stretch[i, j] = np.round((k / diff) * (img_back2[i, j] - 1) + 0.5)
-
+        '''
         plt.subplot(131), plt.imshow(self.image, cmap='gray')
         plt.title('Input '), plt.xticks([]), plt.yticks([])
         plt.subplot(132), plt.imshow(img_back, cmap='gray')
         plt.title('Filtered image'), plt.xticks([]), plt.yticks([])
         plt.show()
 
-        return [gray, img_back, fc_stretch]
+        return [gray, img_back, img_back]
