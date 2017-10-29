@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from PIL import Image
 from matplotlib import pyplot as plt
 # For this part of the assignment, You can use inbuilt functions to compute the fourier transform
 # You are welcome to use fft that are available in numpy and opencv
@@ -56,13 +55,19 @@ class Filtering:
         y1, x1 = np.ogrid[-crow:x - crow, -ccol:y - ccol]
         mask = x1 * x1 + y1 * y1 <= cutoff * cutoff
 
-        lowpassfilter = np.zeros((x, y),np.uint8)
+        lowpassfilter = np.zeros((x, y, 2),np.uint8)
         lowpassfilter[mask] = 1
+
+        # create a mask first, center square is 1, remaining all zeros
+        #rows, cols = self.image.shape
+        #crow, ccol = int(rows / 2), int(cols / 2)  # center
+        #mask = np.zeros((rows, cols, 2), np.uint8)
+        #mask[crow - 30:crow + 30, ccol - 30:ccol + 30] = 1
 
         return lowpassfilter
 
 
-    def get_ideal_high_pass_filter(self, shape, cutoff):
+    def get_ideal_high_pass_filter(self, shape, cutoff, dummy):
         """Computes a Ideal high pass mask
         takes as input:
         shape: the shape of the mask to be generated
@@ -71,8 +76,23 @@ class Filtering:
 
         #Hint: May be one can use the low pass filter function to get a high pass mask
 
-        
-        return 0
+        cutoff = int(cutoff)
+        x = shape[0]
+        y = shape[1]
+        # center pixel
+        crow = int(x / 2)
+        ccol = int(y / 2)
+
+        y1, x1 = np.ogrid[-crow:x - crow, -ccol:y - ccol]
+        mask = x1 * x1 + y1 * y1 <= cutoff * cutoff
+
+        lowpassfilter = np.zeros((x, y, 2), np.uint8)
+        lowpassfilter[mask] = 1
+
+        highpassfilter  = 1 - lowpassfilter
+
+        return highpassfilter
+
 
     def get_butterworth_low_pass_filter(self, shape, cutoff, order):
         """Computes a butterworth low pass mask
@@ -154,52 +174,44 @@ class Filtering:
         filtered image, magnitude of DFT, magnitude of filtered DFT: Make sure all images being returned have grey scale full contrast stretch and dtype=uint8 
         """
 
-        #FFT
-        ft = np.fft.fft2(self.image)
-        fshift = np.fft.fftshift(ft)
+        #print(self.image.dtype)
+        img_float32 = np.float32(self.image)
 
-        #img_float64 = np.float64(self.image)
-        #ft = cv2.dft(img_float64, flags=cv2.DFT_COMPLEX_OUTPUT)
-        #fshift = np.fft.fftshift(ft)
-        #magnitude = 20*np.log(cv2.magnitude(fshift[:, :, 0], fshift[:, :, 1]))
+        dft = cv2.dft(img_float32, flags=cv2.DFT_COMPLEX_OUTPUT)
+        dft_shift = np.fft.fftshift(dft)
 
-        magnitude = 10*np.log(np.abs(fshift))
-        gray = np.array(magnitude,dtype = np.uint8)
+        #save DFT
+        magnitude = 10 * np.log(cv2.magnitude(dft_shift[:, :, 0], dft_shift[:, :, 1]))
+        gray = np.array(magnitude, dtype=np.uint8)
 
-        #Get filter
-        mask = self.filter(gray.shape, self.cutoff, self.order)
+        #mask
+        mask = self.filter(self.image.shape, self.cutoff, self.order)
 
-        #Apply mask
-        filtered_dft = gray*mask
-        #print(filtered_dft)
+        # apply mask and inverse DFT
+        fshift = dft_shift * mask
+        f_ishift = np.fft.ifftshift(fshift)
+        img_back = cv2.idft(f_ishift)
+        img_back = cv2.magnitude(img_back[:, :, 0], img_back[:, :, 1])
 
-        #inverse shift
-        i_fshift = np.fft.ifftshift(filtered_dft)
-        i_ft = np.fft.ifft2(i_fshift)
-        img_back = np.round(np.abs(i_ft))
-
-        #img_back = cv2.idft(i_fshift)
-        #img_back = cv2.magnitude(img_back[:, :, 0], img_back[:, :, 1])
-        print(img_back)
-
-        #Full scale contrast strech
-        x, y = img_back.shape
+        # Full scale contrast stretch
+        x, y = self.image.shape
+        img_back2 = img_back
+        fc_stretch = np.zeros((x, y))
         k = (x * y) - 1
         A = np.min(img_back)
         B = np.max(img_back)
-        diff = B-A
-        print("b",B)
-
-        fc_stretch = np.zeros((x,y),np.uint8)
+        diff = B - A
+        print("x", x)
+        print(img_back2)
 
         for i in range(0, x):
             for j in range(0, y):
-                fc_stretch[i, j] = np.round((k/diff)* (img_back[i, j] - 1) + 0.5)
+                fc_stretch[i, j] = np.round((k / diff) * (img_back2[i, j] - 1) + 0.5)
 
-        print(fc_stretch)
-        cv2.imshow('image', fc_stretch)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        plt.subplot(131), plt.imshow(gray, cmap='gray')
+        plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+        plt.subplot(132), plt.imshow(magnitude, cmap='gray')
+        plt.title('Image after removing low freq'), plt.xticks([]), plt.yticks([])
+        plt.show()
 
-
-        #return [gray, filtered_dft, self.image]
+        return [gray, img_back, fc_stretch]
