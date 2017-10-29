@@ -58,12 +58,6 @@ class Filtering:
         lowpassfilter = np.zeros((x, y, 2),np.uint8)
         lowpassfilter[mask] = 1
 
-        # create a mask first, center square is 1, remaining all zeros
-        #rows, cols = self.image.shape
-        #crow, ccol = int(rows / 2), int(cols / 2)  # center
-        #mask = np.zeros((rows, cols, 2), np.uint8)
-        #mask[crow - 30:crow + 30, ccol - 30:ccol + 30] = 1
-
         return lowpassfilter
 
 
@@ -76,19 +70,7 @@ class Filtering:
 
         #Hint: May be one can use the low pass filter function to get a high pass mask
 
-        cutoff = int(cutoff)
-        x = shape[0]
-        y = shape[1]
-        # center pixel
-        crow = int(x / 2)
-        ccol = int(y / 2)
-
-        y1, x1 = np.ogrid[-crow:x - crow, -ccol:y - ccol]
-        mask = x1 * x1 + y1 * y1 <= cutoff * cutoff
-
-        lowpassfilter = np.zeros((x, y, 2), np.uint8)
-        lowpassfilter[mask] = 1
-
+        lowpassfilter = self.get_ideal_low_pass_filter(shape, cutoff, dummy)
         highpassfilter  = 1 - lowpassfilter
 
         return highpassfilter
@@ -208,10 +190,10 @@ class Filtering:
             for j in range(0, y):
                 fc_stretch[i, j] = np.round((k / diff) * (img_back2[i, j] - 1) + 0.5)
 
-        plt.subplot(131), plt.imshow(gray, cmap='gray')
-        plt.title('Input Image'), plt.xticks([]), plt.yticks([])
-        plt.subplot(132), plt.imshow(magnitude, cmap='gray')
-        plt.title('Image after removing low freq'), plt.xticks([]), plt.yticks([])
+        plt.subplot(131), plt.imshow(self.image, cmap='gray')
+        plt.title('Input '), plt.xticks([]), plt.yticks([])
+        plt.subplot(132), plt.imshow(img_back, cmap='gray')
+        plt.title('Filtered image'), plt.xticks([]), plt.yticks([])
         plt.show()
 
         return [gray, img_back, fc_stretch]
