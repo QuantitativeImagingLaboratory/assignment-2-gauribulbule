@@ -227,9 +227,9 @@ class Filtering:
         dft = cv2.dft(img_float32, flags=cv2.DFT_COMPLEX_OUTPUT)
         dft_shift = np.fft.fftshift(dft)
 
-        #save DFT
+        #Magnitude of DFT
         magnitude = 10 * np.log(cv2.magnitude(dft_shift[:, :, 0], dft_shift[:, :, 1]))
-        gray = np.array(magnitude, dtype=np.uint8)
+        magnitude_DFT = np.array(magnitude, dtype=np.uint8)
 
         #mask
         mask = self.filter(self.image.shape, self.cutoff, self.order)
@@ -240,23 +240,23 @@ class Filtering:
         i_dft = cv2.idft(f_ishift, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT)
         img_back = i_dft.astype(np.uint8)
 
-        #img_back = cv2.magnitude(i_dft[:, :, 0], i_dft[:, :, 1])
+        #Magnitude of filtered DFT
+        magnitude_filtered_DFT = magnitude_DFT*mask[:,:,0]
 
         # Full scale contrast stretch
         fc_stretch = self.post_process_image(img_back)
 
-
-        plt.subplot(131), plt.imshow(self.image, cmap='gray')
-        plt.title('Input'), plt.xticks([]), plt.yticks([])
-        plt.subplot(132), plt.imshow(img_back, cmap='gray')
-        plt.title('IFT '), plt.xticks([]), plt.yticks([])
-        plt.subplot(133), plt.imshow(fc_stretch, cmap='gray')
+        plt.subplot(131), plt.imshow(magnitude_DFT, cmap='gray')
         plt.title('Filtered image'), plt.xticks([]), plt.yticks([])
+        plt.subplot(132), plt.imshow(magnitude_filtered_DFT, cmap='gray')
+        plt.title('DFT '), plt.xticks([]), plt.yticks([])
+        plt.subplot(133), plt.imshow(fc_stretch, cmap='gray')
+        plt.title('Filtered DFT'), plt.xticks([]), plt.yticks([])
         plt.show()
 
-        cv2.imshow('image',(fc_stretch))
+        cv2.imshow('image',(magnitude_filtered_DFT))
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
 
-        return [gray, img_back, fc_stretch]
+        return [fc_stretch, magnitude_DFT, magnitude_filtered_DFT]
