@@ -234,28 +234,16 @@ class Filtering:
         # Full scale contrast stretch
         x, y = img_back.shape
         img_back2 = np.array(img_back)
-        fc_stretch = np.ones((x, y))
-        #fc_stretch1 = np.ones((x, y),np.uint8)
+        #fc_stretch = np.ones((x, y),np.uint16)
+        fc_stretch = np.ones((x, y),np.uint8)
         k = 255 #k-1
         A = np.min(img_back2)
         B = np.max(img_back2)
         diff = B - A
-        print("a",A)
-        print("b", B)
-        print("diff",diff)
-        #print(img_back2)
-        #print("*******")
-        #print(img_back2.dtype)
-        print(fc_stretch.dtype)
 
         for i in range(0, x):
             for j in range(0, y):
-                fc_stretch[i, j] = (np.round(((k / diff) * (img_back2[i, j] - 1)) + 0.5))
-                #fc_stretch1[i, j] = int(np.round(((k / diff) * (img_back2[i, j] - 1)) + 0.5))
-
-        print(fc_stretch)
-        print("*****")
-        #print(fc_stretch1)
+                fc_stretch[i, j] = (np.round(((k / diff) * (img_back2[i, j] - A)) + 0.5))
 
         plt.subplot(131), plt.imshow(self.image, cmap='gray')
         plt.title('Input'), plt.xticks([]), plt.yticks([])
