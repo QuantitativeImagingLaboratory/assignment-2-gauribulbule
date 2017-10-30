@@ -186,8 +186,19 @@ class Filtering:
         2. take negative (255 - fsimage)
         """
 
+        x, y = image.shape
+        img_back2 = np.array(image)
+        fc_stretch = np.ones((x, y), np.uint8)
+        k = 255  # k-1
+        A = np.min(img_back2)
+        B = np.max(img_back2)
+        diff = B - A
 
-        return image
+        for i in range(0, x):
+            for j in range(0, y):
+                fc_stretch[i, j] = (np.round(((k / diff) * (img_back2[i, j] - A)) + 0.5))
+
+        return fc_stretch
 
 
     def filtering(self):
@@ -232,18 +243,8 @@ class Filtering:
         #img_back = cv2.magnitude(i_dft[:, :, 0], i_dft[:, :, 1])
 
         # Full scale contrast stretch
-        x, y = img_back.shape
-        img_back2 = np.array(img_back)
-        #fc_stretch = np.ones((x, y),np.uint16)
-        fc_stretch = np.ones((x, y),np.uint8)
-        k = 255 #k-1
-        A = np.min(img_back2)
-        B = np.max(img_back2)
-        diff = B - A
+        fc_stretch = self.post_process_image(img_back)
 
-        for i in range(0, x):
-            for j in range(0, y):
-                fc_stretch[i, j] = (np.round(((k / diff) * (img_back2[i, j] - A)) + 0.5))
 
         plt.subplot(131), plt.imshow(self.image, cmap='gray')
         plt.title('Input'), plt.xticks([]), plt.yticks([])
