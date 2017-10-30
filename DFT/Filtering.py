@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import math
+from PIL import Image
 from matplotlib import pyplot as plt
 # For this part of the assignment, You can use inbuilt functions to compute the fourier transform
 # You are welcome to use fft that are available in numpy and opencv
@@ -225,29 +226,48 @@ class Filtering:
         # apply mask and inverse DFT
         fshift = dft_shift * mask
         f_ishift = np.fft.ifftshift(fshift)
-        img_back = cv2.idft(f_ishift)
-        img_back = cv2.magnitude(img_back[:, :, 0], img_back[:, :, 1])
+        i_dft = cv2.idft(f_ishift, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT)
+        img_back = i_dft.astype(np.uint8)
+
+        #img_back = cv2.magnitude(i_dft[:, :, 0], i_dft[:, :, 1])
 
         # Full scale contrast stretch
-        '''
-        x, y = self.image.shape
-        img_back2 = img_back
-        fc_stretch = np.zeros((x, y))
-        k = (x * y) - 1
-        A = np.min(img_back)
-        B = np.max(img_back)
+        x, y = img_back.shape
+        img_back2 = np.array(img_back)
+        fc_stretch = np.ones((x, y))
+        #fc_stretch1 = np.ones((x, y),np.uint8)
+        k = 255 #k-1
+        A = np.min(img_back2)
+        B = np.max(img_back2)
         diff = B - A
-        print("x", x)
-        print(img_back2)
+        print("a",A)
+        print("b", B)
+        print("diff",diff)
+        #print(img_back2)
+        #print("*******")
+        #print(img_back2.dtype)
+        print(fc_stretch.dtype)
 
         for i in range(0, x):
             for j in range(0, y):
-                fc_stretch[i, j] = np.round((k / diff) * (img_back2[i, j] - 1) + 0.5)
-        '''
+                fc_stretch[i, j] = (np.round(((k / diff) * (img_back2[i, j] - 1)) + 0.5))
+                #fc_stretch1[i, j] = int(np.round(((k / diff) * (img_back2[i, j] - 1)) + 0.5))
+
+        print(fc_stretch)
+        print("*****")
+        #print(fc_stretch1)
+
         plt.subplot(131), plt.imshow(self.image, cmap='gray')
-        plt.title('Input '), plt.xticks([]), plt.yticks([])
+        plt.title('Input'), plt.xticks([]), plt.yticks([])
         plt.subplot(132), plt.imshow(img_back, cmap='gray')
+        plt.title('IFT '), plt.xticks([]), plt.yticks([])
+        plt.subplot(133), plt.imshow(fc_stretch, cmap='gray')
         plt.title('Filtered image'), plt.xticks([]), plt.yticks([])
         plt.show()
 
-        return [gray, img_back, img_back]
+        cv2.imshow('image',(fc_stretch))
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+
+        return [gray, img_back, fc_stretch]
