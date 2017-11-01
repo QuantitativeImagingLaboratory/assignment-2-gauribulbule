@@ -10,7 +10,7 @@ by half.
 Question 2 - > Filtering:
 
 To compute fourier transform and inverse fourier transform of an image, I have used opencv (cv2) functions. Full scale
-contrast stretch is applied on final Filtered grayscale image.
+contrast stretch is applied on final filtered grayscale image.
 
 Low pass filters:
 
@@ -26,17 +26,17 @@ less ringing effect than that of image with cutoff 30 and order 10.
 
 There were no ringing effects in gaussian filtered image. Filtered images with Gaussian are smoother
 than that of butterworth for a same cutoff. For a given image, Lenna0.jpg, filtered image is much clear than that of
-original image. Noise if the form of dots is removed.
+original image. Noise in the form of dots is removed.
 
 High pass Filters:
 
 They are used for image sharpening. They allow to pass only frequencies greater than a cutoff (radius)
 
-To apply a full contrast stretch on filtered image, inverse fourier image (float32) is convered to grayscale (uint8)
+To apply a full contrast stretch on filtered image, inverse fourier image (float32) is converted to a grayscale (uint8)
 image. Hence grayscale image looks different than that of inverse fourier transformed image. Also, a negative of an image
 is taken to improve the visibility of a processed image.
 
-Butterworth filter results are better rhan that of ideal high pass filter for a particular cutoff. Ex. for cutoff 50 and
+Butterworth filter results are better than that of ideal high pass filter for a particular cutoff. Ex. for cutoff 50 and
 order 2, Butterworth gave better result than ideal high pass filter.
 
 For both the filters as ringing effect reduced with increasing cutoff value and constant order 2 for Butterworth.
