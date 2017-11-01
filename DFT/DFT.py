@@ -19,7 +19,7 @@ class DFT:
 
         #Fourier Transform matrix:
         ft = np.zeros([x,y], complex)
-
+        count  =0
         for u in range(0, x):
             for v in range(0, y):
                 sum_ft = 0
@@ -30,6 +30,14 @@ class DFT:
 
                 ft[u, v] = sum_ft
 
+                #print(u, v)
+                if  u != 0 and v != 0 and (u <= int(x/2) and  v < int(y/2)):
+
+                    ft[(x - u), (y - v)] = np.real(ft[u, v]) - np.imag(ft[u, v] * 1j)
+                    count = count + 2
+                    
+                if count == x*y:
+                    return ft
         return ft
 
     def inverse_transform(self, matrix):
@@ -53,6 +61,7 @@ class DFT:
                         sum_ift = sum_ift + matrix[u, v] * (np.cos(((2 * np.pi) / N) * (u * i + v * j)) + 1j * np.sin(((2 * np.pi) / N) * (u * i + v * j)))
 
                 ift[i, j] = sum_ift
+
 
         return ift/(x*x)
 
@@ -100,9 +109,6 @@ class DFT:
         for i in range(0, x):
             for j in range(0, y):
                 dft[i, j] = np.sqrt(np.square(np.real(matrix[i, j])) + np.square(np.imag(matrix[i, j])))
-
-        # x = np.fft.ifft2(matrix)
-        # print(x)
 
 
         return dft
