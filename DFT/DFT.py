@@ -31,7 +31,7 @@ class DFT:
                 ft[u, v] = sum_ft
 
                 #print(u, v)
-                if  u != 0 and v != 0 and (u <= int(x/2) and v < int(y/2)):
+                if u != 0 and v != 0 and (u <= int(x/2) and v < int(y/2)):
 
                     ft[(x - u), (y - v)] = np.real(ft[u, v]) - np.imag(ft[u, v] * 1j)
                     count = count + 2
