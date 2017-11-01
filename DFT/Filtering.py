@@ -37,6 +37,7 @@ class Filtering:
 
         self.cutoff = cutoff
         self.order = order
+        self.filter_name = filter_name
 
 
     #Modified to add dummy parameter for order
@@ -188,7 +189,7 @@ class Filtering:
 
         x, y = image.shape
         img_back2 = np.array(image)
-        fc_stretch = np.ones((x, y), np.uint8)
+        fc_stretch = np.ones((x, y),np.uint8)
         k = 255  # k-1
         A = np.min(img_back2)
         B = np.max(img_back2)
@@ -197,6 +198,9 @@ class Filtering:
         for i in range(0, x):
             for j in range(0, y):
                 fc_stretch[i, j] = (np.round(((k / diff) * (img_back2[i, j] - A)) + 0.5))
+
+        if self.filter_name == "ideal_h" or self.filter_name == "butterworth_h" or self.filter_name == "gaussian_h":
+            fc_stretch = 255 - fc_stretch
 
         return fc_stretch
 
@@ -238,25 +242,14 @@ class Filtering:
         fshift = dft_shift * mask
         f_ishift = np.fft.ifftshift(fshift)
         i_dft = cv2.idft(f_ishift, flags=cv2.DFT_SCALE | cv2.DFT_REAL_OUTPUT)
+
+        #print(nmg.dtype)
         img_back = i_dft.astype(np.uint8)
 
         #Magnitude of filtered DFT
-        magnitude_filtered_DFT = magnitude_DFT*mask[:,:,0]
+        magnitude_filtered_DFT = np.array(magnitude_DFT*mask[:,:,1], dtype = np.uint8)
 
         # Full scale contrast stretch
         fc_stretch = self.post_process_image(img_back)
-
-        plt.subplot(131), plt.imshow(magnitude_DFT, cmap='gray')
-        plt.title('Filtered image'), plt.xticks([]), plt.yticks([])
-        plt.subplot(132), plt.imshow(magnitude_filtered_DFT, cmap='gray')
-        plt.title('DFT '), plt.xticks([]), plt.yticks([])
-        plt.subplot(133), plt.imshow(fc_stretch, cmap='gray')
-        plt.title('Filtered DFT'), plt.xticks([]), plt.yticks([])
-        plt.show()
-
-        cv2.imshow('image',(magnitude_filtered_DFT))
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
 
         return [fc_stretch, magnitude_DFT, magnitude_filtered_DFT]
