@@ -1,12 +1,16 @@
 # Report
 
-Question 1 ->
+Question 1 -> DFT
 
+Four given transformations (FFT, inverse FT, magnitude & cosine) are implemented using mathematical formulae. No in-built
+library functions are used. Forward fourier transformed matrix values are complex conjugates of each other. I have used
+this idea to compute half of the matrix values from their complex conjugate part. Hence reducing the computation time
+by half.
 
 Question 2 - > Filtering:
 
-To compute fourier transform and inverse fourier transform of an image, I have used opencv (cv2) functions. Full stretch
-contrast stretch is applied on final Filtered image.
+To compute fourier transform and inverse fourier transform of an image, I have used opencv (cv2) functions. Full scale
+contrast stretch is applied on final Filtered grayscale image.
 
 Low pass filters:
 
