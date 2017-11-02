@@ -4,13 +4,15 @@ Question 1 -> DFT
 
 Four given transformations (FFT, inverse FT, magnitude & cosine) are implemented using mathematical formulae. No in-built
 library functions are used. Forward fourier transformed matrix values are complex conjugates of each other. I have used
-this idea to compute half of the matrix values from their complex conjugate part. Hence reducing the computation time
-by half.
+this idea to compute half of the matrix values from their complex conjugate part. Hence reducing the iterations by half.
 
 Question 2 - > Filtering:
 
 To compute fourier transform and inverse fourier transform of an image, I have used opencv (cv2) functions. Full scale
 contrast stretch is applied on final filtered grayscale image.
+
+I also observed that with opencv, when a high pass filter is applied, final output image looks different than an image
+when a numpy functions are used. For opencv edges of an image looked better than when numpy functions are applied.
 
 Low pass filters:
 
@@ -27,6 +29,8 @@ less ringing effect than that of image with cutoff 30 and order 10.
 There were no ringing effects in gaussian filtered image. Filtered images with Gaussian are smoother
 than that of butterworth for a same cutoff. For a given image, Lenna0.jpg, filtered image is much clear than that of
 original image. Noise in the form of dots is removed.
+
+As a part of post-processing, I did not need to take a negative of image after a contrast stretch.
 
 High pass Filters:
 
