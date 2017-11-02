@@ -23,7 +23,7 @@ Method:
 4) Calculated inverse shift and inverse fourier transform
 5) Took magnitude of the image in step 4 and converted it to uint8 to perform full scale contrast stretch
 6) Took negative of contrast stretched image if high pass filter is applied (final filtered image)
-7) Returned final filtered image, magnitude of dft and magnitude of filtered dft
+7) Returned final filtered image, magnitude of image in step2 (dft) and magnitude of image in step 3 (filtered dft)
 
 I) Low pass filters:
 
