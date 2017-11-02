@@ -15,7 +15,17 @@ I also observed that with opencv, when a high pass filter is applied, final outp
 when a numpy functions are used. For opencv edges of an image looked better than when numpy functions are applied. So I
 have used opencv.
 
-Low pass filters:
+Method:
+
+1) Converted image to float32
+2) Applied fourier transform (dft()) to image and then shift
+3) Calculate the mask (filter) and apply it to an image in step 2
+4) Calculated inverse shift and inverse fourier transform
+5) Took magnitude of the image in step 4 and converted it to uint8 to perform full scale contrast stretch
+6) Took negative of contrast stretched image if high pass filter is applied (final filtered image)
+7) Returned final filtered image, magnitude of dft and magnitude of filtered dft
+
+I) Low pass filters:
 
 They are used for smoothing, to remove noise. It allows to pass only frequencies lower than a cutoff (radius).
 
@@ -33,7 +43,7 @@ original image. Noise in the form of dots is removed.
 
 As a part of post-processing, I did not need to take a negative of image after a contrast stretch.
 
-High pass Filters:
+II) High pass Filters:
 
 They are used for image sharpening. They allow to pass only frequencies greater than a cutoff (radius)
 
