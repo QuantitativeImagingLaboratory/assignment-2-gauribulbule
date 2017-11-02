@@ -9,10 +9,11 @@ this idea to compute half of the matrix values from their complex conjugate part
 Question 2 - > Filtering:
 
 To compute fourier transform and inverse fourier transform of an image, I have used opencv (cv2) functions. Full scale
-contrast stretch is applied on final filtered grayscale image.
+contrast stretch is applied on final filtered grayscale image. Negative of image is taken only for high pass filters.
 
 I also observed that with opencv, when a high pass filter is applied, final output image looks different than an image
-when a numpy functions are used. For opencv edges of an image looked better than when numpy functions are applied.
+when a numpy functions are used. For opencv edges of an image looked better than when numpy functions are applied. So I
+have used opencv.
 
 Low pass filters:
 
