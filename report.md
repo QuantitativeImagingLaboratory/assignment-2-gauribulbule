@@ -10,6 +10,7 @@ Question 2 - > Filtering:
 
 To compute fourier transform and inverse fourier transform of an image, I have used opencv (cv2) functions. Full scale
 contrast stretch is applied on final filtered grayscale image. Negative of image is taken only for high pass filters.
+All theh filters are computed using their mathematical formulae.
 
 I also observed that with opencv, when a high pass filter is applied, final output image looks different than an image
 when a numpy functions are used. For opencv edges of an image looked better than when numpy functions are applied. So I
@@ -47,7 +48,7 @@ II) High pass Filters:
 
 They are used for image sharpening. They allow to pass only frequencies greater than a cutoff (radius)
 
-To apply a full contrast stretch on filtered image, inverse fourier image (float32) is converted to a grayscale (uint8)
+To apply a full contrast stretch on filtered image, inverse fourier transformed image (float32) is converted to a grayscale (uint8)
 image. Hence grayscale image looks different than that of inverse fourier transformed image. Also, a negative of an image
 is taken to improve the visibility of a processed image.
 
